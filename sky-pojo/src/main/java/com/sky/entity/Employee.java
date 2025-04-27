@@ -1,5 +1,6 @@
 package com.sky.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -31,8 +32,8 @@ public class Employee implements Serializable {
     private String idNumber;
 
     private Integer status;
-
-    //@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+//    日期格式化(不推荐),建议拓展Spring MVC的消息转换器，统一对日期类型进行格式化处理
+//    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;
 
     //@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
