@@ -9,6 +9,7 @@ import com.sky.context.BaseContext;
 import com.sky.dto.EmployeeDTO;
 import com.sky.dto.EmployeeLoginDTO;
 import com.sky.dto.EmployeePageQueryDTO;
+import com.sky.dto.PasswordEditDTO;
 import com.sky.entity.Employee;
 import com.sky.exception.AccountLockedException;
 import com.sky.exception.AccountNotFoundException;
@@ -130,6 +131,65 @@ public class EmployeeServiceImpl implements EmployeeService {
                 status(status).
                 id(id).
                 build();
+
+        employeeMapper.update(employee);
+    }
+
+    /**
+     * 根据id查询员工信息
+     * @param id
+     * @return
+     */
+    public Employee getById(Long id) {
+        Employee employee=employeeMapper.getById(id);
+        employee.setPassword("****");
+        return employee;
+    }
+
+    /**
+     * 编辑员工信息
+     * @param employeeDTO
+     * @return
+     */
+    public void update(EmployeeDTO employeeDTO) {
+        Employee employee = new Employee();
+        BeanUtils.copyProperties(employeeDTO,employee);
+
+        employee.setUpdateTime(LocalDateTime.now());
+        employee.setUpdateUser(BaseContext.getCurrentId());
+
+        employeeMapper.update(employee);
+    }
+
+    /**
+     * 修改密码
+     * @param passwordEditDTO
+     * @return
+     */
+    public void editPassword(PasswordEditDTO passwordEditDTO) {
+        //通过线程拿到当前用户id
+        Employee employee=employeeMapper.getById(BaseContext.getCurrentId());
+
+        String oldPassword = passwordEditDTO.getOldPassword();
+        String newPassword =passwordEditDTO.getNewPassword();
+        //密码比对
+        // 对前端传过来的明文密码进行md5加密处理
+        oldPassword = DigestUtils.md5DigestAsHex(oldPassword.getBytes());
+        if (!oldPassword.equals(employee.getPassword())) {
+            //密码错误
+            throw new PasswordErrorException(MessageConstant.PASSWORD_ERROR);
+        }
+        employee.setUpdateTime(LocalDateTime.now());
+        employee.setUpdateUser(BaseContext.getCurrentId());
+
+        //对新密码进行md5加密
+        newPassword = DigestUtils.md5DigestAsHex(newPassword.getBytes());
+        employee.setPassword(newPassword);
+
+
+        passwordEditDTO.setEmpId(employee.getId());
+        passwordEditDTO.setNewPassword("****");
+        passwordEditDTO.setOldPassword("****");
 
         employeeMapper.update(employee);
     }
