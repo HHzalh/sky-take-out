@@ -130,6 +130,8 @@ public class EmployeeServiceImpl implements EmployeeService {
         Employee employee = Employee.builder().
                 status(status).
                 id(id).
+                updateTime(LocalDateTime.now()).
+                updateUser(BaseContext.getCurrentId()).
                 build();
 
         employeeMapper.update(employee);
@@ -137,23 +139,25 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     /**
      * 根据id查询员工信息
+     *
      * @param id
      * @return
      */
     public Employee getById(Long id) {
-        Employee employee=employeeMapper.getById(id);
+        Employee employee = employeeMapper.getById(id);
         employee.setPassword("****");
         return employee;
     }
 
     /**
      * 编辑员工信息
+     *
      * @param employeeDTO
      * @return
      */
     public void update(EmployeeDTO employeeDTO) {
         Employee employee = new Employee();
-        BeanUtils.copyProperties(employeeDTO,employee);
+        BeanUtils.copyProperties(employeeDTO, employee);
 
         employee.setUpdateTime(LocalDateTime.now());
         employee.setUpdateUser(BaseContext.getCurrentId());
@@ -163,15 +167,16 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     /**
      * 修改密码
+     *
      * @param passwordEditDTO
      * @return
      */
     public void editPassword(PasswordEditDTO passwordEditDTO) {
         //通过线程拿到当前用户id
-        Employee employee=employeeMapper.getById(BaseContext.getCurrentId());
+        Employee employee = employeeMapper.getById(BaseContext.getCurrentId());
 
         String oldPassword = passwordEditDTO.getOldPassword();
-        String newPassword =passwordEditDTO.getNewPassword();
+        String newPassword = passwordEditDTO.getNewPassword();
         //密码比对
         // 对前端传过来的明文密码进行md5加密处理
         oldPassword = DigestUtils.md5DigestAsHex(oldPassword.getBytes());

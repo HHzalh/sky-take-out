@@ -30,7 +30,7 @@ public interface EmployeeMapper {
     void insert(Employee employee);
 
     /**
-     * 分页查询
+     * 员工分页查询
      *
      * @param employeePageQueryDTO
      * @return
@@ -39,12 +39,14 @@ public interface EmployeeMapper {
 
     /**
      * 根据主键动态修改属性
+     *
      * @param employee
      */
     void update(Employee employee);
 
     /**
      * 根据id查询员工信息
+     *
      * @param id
      * @return
      */
