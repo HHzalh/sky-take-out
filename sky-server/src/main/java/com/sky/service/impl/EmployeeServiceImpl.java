@@ -23,7 +23,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -83,14 +82,14 @@ public class EmployeeServiceImpl implements EmployeeService {
         //设置密码，默认密码 123456
         employee.setPassword(DigestUtils.md5DigestAsHex(PasswordConstant.DEFAULT_PASSWORD.getBytes()));
 
-        //设置当前记录的创建时间和修改时间
+        //已通过AOP切面统一对公共字段进行赋值，以提高代码复用性和可维护性
+
+        /*设置当前记录的创建时间和修改时间
         employee.setCreateTime(LocalDateTime.now());
         employee.setUpdateTime(LocalDateTime.now());
-
-        //设置当前记录创建人id和修改人id
+        设置当前记录创建人id和修改人id
         employee.setCreateUser(BaseContext.getCurrentId());
-        employee.setUpdateUser(BaseContext.getCurrentId());
-
+        employee.setUpdateUser(BaseContext.getCurrentId());*/
         employeeMapper.insert(employee);
     }
 
@@ -126,13 +125,14 @@ public class EmployeeServiceImpl implements EmployeeService {
         employee.setStatus(status);
         employee.setId(id);*/
 
-        //利用builder构建者模式
+        //利用builder构建
+        //已通过AOP切面统一对公共字段进行赋值，以提高代码复用性和可维护性
         Employee employee = Employee.builder().
                 status(status).
                 id(id).
-                updateTime(LocalDateTime.now()).
-                updateUser(BaseContext.getCurrentId()).
-                build();
+                /*updateTime(LocalDateTime.now()).
+                updateUser(BaseContext.getCurrentId()).*/
+                        build();
 
         employeeMapper.update(employee);
     }
@@ -159,8 +159,11 @@ public class EmployeeServiceImpl implements EmployeeService {
         Employee employee = new Employee();
         BeanUtils.copyProperties(employeeDTO, employee);
 
-        employee.setUpdateTime(LocalDateTime.now());
-        employee.setUpdateUser(BaseContext.getCurrentId());
+
+        //已通过AOP切面统一对公共字段进行赋值，以提高代码复用性和可维护性
+
+        /*employee.setUpdateTime(LocalDateTime.now());
+        employee.setUpdateUser(BaseContext.getCurrentId());*/
 
         employeeMapper.update(employee);
     }
@@ -184,8 +187,10 @@ public class EmployeeServiceImpl implements EmployeeService {
             //密码错误
             throw new PasswordErrorException(MessageConstant.PASSWORD_ERROR);
         }
-        employee.setUpdateTime(LocalDateTime.now());
-        employee.setUpdateUser(BaseContext.getCurrentId());
+        //已通过AOP切面统一对公共字段进行赋值，以提高代码复用性和可维护性
+
+        /*employee.setUpdateTime(LocalDateTime.now());
+        employee.setUpdateUser(BaseContext.getCurrentId());*/
 
         //对新密码进行md5加密
         newPassword = DigestUtils.md5DigestAsHex(newPassword.getBytes());
