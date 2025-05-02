@@ -27,6 +27,14 @@
                 and d.status =#{status}
             </if>
         </where>
-        order by d.price asc
+        order by d.create_time
     </select>
+
+    <delete id="deleteByIds">
+        delete from dish where id in
+        <foreach collection="ids" open="(" close=")" separator="," item="id">
+            #{id}
+        </foreach>
+    </delete>
+
 </mapper>
