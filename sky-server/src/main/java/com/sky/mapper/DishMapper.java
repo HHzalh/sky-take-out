@@ -54,7 +54,6 @@ public interface DishMapper {
      *
      * @param id
      */
-
     @Delete("delete from dish where id=#{id}")
     void deleteById(Long id);
 
@@ -64,4 +63,13 @@ public interface DishMapper {
      * @param ids
      */
     void deleteByIds(List<Long> ids);
+
+    /**
+     * 根据主键动态修改属性
+     *
+     * @param dish
+     */
+    @AutoFill(value = OperationType.UPDATE)
+    void update(Dish dish);
+
 }
