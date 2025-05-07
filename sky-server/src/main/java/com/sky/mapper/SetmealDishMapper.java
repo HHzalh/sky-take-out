@@ -2,11 +2,13 @@ package com.sky.mapper;
 
 import com.sky.entity.SetmealDish;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
 @Mapper
 public interface SetmealDishMapper {
+
     /**
      * 根据菜品id查询对应的套餐id
      *
@@ -22,4 +24,22 @@ public interface SetmealDishMapper {
      * @param setmealDishes
      */
     void insertSetmealDish(List<SetmealDish> setmealDishes);
+
+    /**
+     * 根据套餐zid查询对应的关联菜品
+     *
+     * @param setmealId
+     * @return
+     */
+    @Select("select * from setmeal_dish where setmeal_id=#{setmealId}")
+    List<SetmealDish> getBySetmealDishId(Long id);
+
+    /**
+     * 根据套餐菜品id删除关联菜品关系
+     *
+     * @param id
+     */
+    void deleteBySetmealDishId(Long id);
+
+
 }
