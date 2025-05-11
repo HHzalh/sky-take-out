@@ -32,11 +32,12 @@
         <poi>3.16</poi>
     </properties>
     <dependencyManagement>
-        <dependencies><dependency>
-            <groupId>org.mybatis.spring.boot</groupId>
-            <artifactId>mybatis-spring-boot-starter</artifactId>
-            <version>${mybatis.spring}</version>
-        </dependency>
+        <dependencies>
+            <dependency>
+                <groupId>org.mybatis.spring.boot</groupId>
+                <artifactId>mybatis-spring-boot-starter</artifactId>
+                <version>${mybatis.spring}</version>
+            </dependency>
             <!-- MyBatis Spring Boot Starter依赖，用于集成MyBatis和Spring Boot -->
 
             <dependency>
@@ -101,13 +102,6 @@
                 <version>${jjwt}</version>
             </dependency>
             <!-- JJwt依赖，用于生成和解析JWT -->
-
-            <dependency>
-                <groupId>com.aliyun.oss</groupId>
-                <artifactId>aliyun-sdk-oss</artifactId>
-                <version>${aliyun.sdk.oss}</version>
-            </dependency>
-            <!-- 阿里云OSS SDK依赖，用于对象存储服务 -->
 
             <dependency>
                 <groupId>javax.xml.bind</groupId>
