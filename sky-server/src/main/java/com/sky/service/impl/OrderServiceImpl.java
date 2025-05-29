@@ -24,6 +24,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -224,7 +225,7 @@ public class OrderServiceImpl implements OrderService {
      * @param id
      * @return
      */
-    public OrderVO getorderDetailById(Long id) {
+    public OrderVO getOrdersDetailById(Long id) {
         Orders orders = orderMapper.getById(id);
         List<OrderDetail> orderDetailList = orderDetailMapper.getByOrderId(orders.getId());
         OrderVO orderVO = new OrderVO();
@@ -298,5 +299,61 @@ public class OrderServiceImpl implements OrderService {
 
         shoppingCartMapper.insertBatch(shoppingCartList);
 
+    }
+
+    /**
+     * 订单搜索
+     *
+     * @param ordersPageQueryDTO
+     * @return
+     */
+    public PageResult conditionSearch(OrdersPageQueryDTO ordersPageQueryDTO) {
+        PageHelper.startPage(ordersPageQueryDTO.getPage(), ordersPageQueryDTO.getPageSize());
+        Page<Orders> page = orderMapper.pageQuery(ordersPageQueryDTO);
+
+        //部分订单转态，需要额外返回订单菜品的信息，将Orders转换为OrderVO
+        List<OrderVO> orderVOList = getOrderVoList(page);
+
+        return new PageResult(page.getTotal(), orderVOList);
+    }
+
+    private List<OrderVO> getOrderVoList(Page<Orders> page) {
+        //需要返回订单菜品信息，自定义OrderVo响应的结果
+        List<OrderVO> orderVOList = new ArrayList<>();
+
+        List<Orders> ordersList = page.getResult();
+        if (!CollectionUtils.isEmpty(ordersList)) {
+            for (Orders orders : ordersList) {
+                // 将共同字段复制到OrderVO
+                OrderVO orderVO = new OrderVO();
+                BeanUtils.copyProperties(orders, orderVO);
+                String orderDishes = getOrderDishesStr(orders);
+
+                // 将订单菜品信息封装到orderVO中，并添加到orderVOList
+                orderVO.setOrderDishes(orderDishes);
+                orderVOList.add(orderVO);
+            }
+        }
+        return orderVOList;
+    }
+
+    /**
+     * 根据订单id获取菜品信息字符串
+     *
+     * @param orders
+     * @return
+     */
+    private String getOrderDishesStr(Orders orders) {
+        List<OrderDetail> orderDetailList = orderDetailMapper.getByOrderId(orders.getId());
+
+        StringBuilder dishesBuilder = new StringBuilder();
+        for (OrderDetail detail : orderDetailList) {
+            dishesBuilder.append(detail.getName())
+                    .append("*")
+                    .append(detail.getNumber())
+                    .append(";");
+        }
+
+        return dishesBuilder.toString();
     }
 }

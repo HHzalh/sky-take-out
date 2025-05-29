@@ -76,7 +76,7 @@ public class OrderController {
     @ApiOperation("查询订单详情")
     @GetMapping("/orderDetail/{id}")
     public Result<OrderVO> orderDetail(@PathVariable Long id) {
-        OrderVO orderVO = orderService.getorderDetailById(id);
+        OrderVO orderVO = orderService.getOrdersDetailById(id);
         return Result.success(orderVO);
     }
 
