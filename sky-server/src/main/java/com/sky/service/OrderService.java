@@ -59,4 +59,12 @@ public interface OrderService {
      * @return
      */
     void cancelOrdersById(Long id);
+
+    /**
+     * 再来一单
+     *
+     * @param id
+     * @return
+     */
+    void repeatOrdersById(Long id);
 }

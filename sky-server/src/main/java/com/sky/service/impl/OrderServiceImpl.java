@@ -268,4 +268,35 @@ public class OrderServiceImpl implements OrderService {
         orders.setCancelTime(LocalDateTime.now());
         orderMapper.update(orders);
     }
+
+    /**
+     * 再来一单
+     *
+     * @param id
+     * @return
+     */
+    public void repeatOrdersById(Long id) {
+        // 查询当前用户id
+        Long userId = BaseContext.getCurrentId();
+        // 根据订单id查询当前订单详情
+        List<OrderDetail> orderDetailList = orderDetailMapper.getByOrderId(id);
+
+        List<ShoppingCart> shoppingCartList = new ArrayList<>();
+        for (OrderDetail od : orderDetailList) {
+            ShoppingCart shoppingCart = new ShoppingCart();
+
+            // 拷贝（排除id）
+            BeanUtils.copyProperties(od, shoppingCart, "id");
+
+            // 设置用户ID
+            shoppingCart.setUserId(userId);
+            // 设置创建时间
+            shoppingCart.setCreateTime(LocalDateTime.now());
+
+            shoppingCartList.add(shoppingCart);
+        }
+
+        shoppingCartMapper.insertBatch(shoppingCartList);
+
+    }
 }
