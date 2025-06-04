@@ -105,4 +105,20 @@ public interface OrderService {
      * @return
      */
     void cancel(OrdersCancelDTO ordersCancelDTO);
+
+    /**
+     * 派送订单
+     *
+     * @param id
+     * @return
+     */
+    void delivery(Long id);
+
+    /**
+     * 完成订单
+     *
+     * @param id
+     * @return
+     */
+    void complete(Long id);
 }
