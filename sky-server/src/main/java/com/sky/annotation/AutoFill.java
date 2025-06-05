@@ -8,7 +8,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 自定义注解，用于标识某个方法需要进行功能呢字段自动填充处理
+ * 自定义注解，用于标识某个方法需要进行功能的字段自动填充处理
  */
 
 /*@Target():可使用的值定义在ElementType枚举类中，常用值如下：Type、类、接口/FIELD、成员变量/METHOD、成员方法

@@ -24,5 +24,9 @@ public class MessageConstant {
     public static final String DISH_BE_RELATED_BY_SETMEAL = "当前菜品关联了套餐,不能删除";
     public static final String ORDER_STATUS_ERROR = "订单状态错误";
     public static final String ORDER_NOT_FOUND = "订单不存在";
+    public static final String STORE_ADDRESS_PARSING_FAILED = "店铺地址解析失败";
+    public static final String RECEIVING_ADDRESS_PARSING_FAILED = "收货地址解析失败";
+    public static final String OUT_OF_DELIVERY_RANGE = "超出配送范围";
+    public static final String DELIVERY_ROUTE_PLANNING_FAILED = "配送路线规划失败";
 
 }

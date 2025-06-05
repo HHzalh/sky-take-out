@@ -1,5 +1,7 @@
 package com.sky.service.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
@@ -13,6 +15,7 @@ import com.sky.exception.ShoppingCartBusinessException;
 import com.sky.mapper.*;
 import com.sky.result.PageResult;
 import com.sky.service.OrderService;
+import com.sky.utils.HttpClientUtil;
 import com.sky.utils.WeChatPayUtil;
 import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderStatisticsVO;
@@ -21,13 +24,16 @@ import com.sky.vo.OrderVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -53,6 +59,11 @@ public class OrderServiceImpl implements OrderService {
 
     private Orders orders;
 
+    @Value("${sky.shop.address}")
+    private String shopAddress;
+    @Value("${sky.baidu.ak}")
+    private String ak;
+
     /**
      * 用户下单
      *
@@ -68,6 +79,10 @@ public class OrderServiceImpl implements OrderService {
             //抛出业务异常
             throw new AddressBookBusinessException(MessageConstant.ADDRESS_BOOK_IS_NULL);
         }
+
+        //检查用户的收货地址是否超出配送范围
+        checkOutOfRange(addressBook.getProvinceName() + addressBook.getCityName() +
+                addressBook.getDistrictName() + addressBook.getDetail());
 
         //查询当前用户的购物车数据
         Long userId = BaseContext.getCurrentId();
@@ -483,5 +498,88 @@ public class OrderServiceImpl implements OrderService {
         orders.setStatus(Orders.COMPLETED);
         orders.setDeliveryTime(LocalDateTime.now());
         orderMapper.update(orders);
+    }
+
+    /**
+     * 检查客户的收货地址是否超出配送范围
+     *
+     * @param address 客户的收货地址
+     */
+    private void checkOutOfRange(String address) {
+        Map params = new HashMap();
+        // 将店铺地址添加到参数Map中，键为"address"
+        params.put("address", shopAddress);
+        // 将输出格式设置为JSON，添加到参数Map中，键为"output"
+        params.put("output", "json");
+        // 将API密钥添加到参数Map中，键为"ak"
+        params.put("ak", ak);
+
+
+        // 调用百度地图API获取店铺的经纬度坐标
+        String shopCoordinate = HttpClientUtil.doGet("https://api.map.baidu.com/geocoding/v3", params);
+
+        // 将返回的JSON字符串解析为JSONObject
+        JSONObject jsonObject = JSON.parseObject(shopCoordinate);
+        // 检查API调用是否成功
+        if (!jsonObject.getString("status").equals("0")) {
+            // 如果失败，抛出业务异常
+            throw new OrderBusinessException(MessageConstant.STORE_ADDRESS_PARSING_FAILED);
+        }
+
+        // 从返回结果中获取店铺的经纬度坐标
+        JSONObject location = jsonObject.getJSONObject("result").getJSONObject("location");
+        String lat = location.getString("lat");
+        String lng = location.getString("lng");
+        // 拼接店铺的经纬度坐标
+        String shopLngLat = lat + "," + lng;
+
+        // 将客户收货地址添加到请求参数中
+        params.put("address", address);
+        // 调用百度地图API获取客户收货地址的经纬度坐标
+        String userCoordinate = HttpClientUtil.doGet("https://api.map.baidu.com/geocoding/v3", params);
+
+        // 将返回的JSON字符串解析为JSONObject
+        jsonObject = JSON.parseObject(userCoordinate);
+        // 检查API调用是否成功
+        if (!jsonObject.getString("status").equals("0")) {
+            // 如果失败，抛出业务异常
+            throw new OrderBusinessException(MessageConstant.RECEIVING_ADDRESS_PARSING_FAILED);
+        }
+
+        // 从返回结果中获取客户收货地址的经纬度坐标
+        location = jsonObject.getJSONObject("result").getJSONObject("location");
+        lat = location.getString("lat");
+        lng = location.getString("lng");
+        // 拼接客户收货地址的经纬度坐标
+        String userLngLat = lat + "," + lng;
+
+        // 将店铺和客户收货地址的经纬度坐标添加到请求参数中
+        params.put("origin", shopLngLat);
+        params.put("destination", userLngLat);
+        // 设置不需要返回路线详细信息
+        params.put("steps_info", "0");
+
+        // 调用百度地图API进行路线规划
+        String json = HttpClientUtil.doGet("https://api.map.baidu.com/directionlite/v1/driving", params);
+
+        // 将返回的JSON字符串解析为JSONObject
+        jsonObject = JSON.parseObject(json);
+        // 检查API调用是否成功
+        if (!jsonObject.getString("status").equals("0")) {
+            // 如果失败，抛出业务异常
+            throw new OrderBusinessException(MessageConstant.DELIVERY_ROUTE_PLANNING_FAILED);
+        }
+
+        // 从返回结果中获取路线信息
+        JSONObject result = jsonObject.getJSONObject("result");
+        JSONArray jsonArray = (JSONArray) result.get("routes");
+        // 获取第一条路线的距离
+        Integer distance = (Integer) ((JSONObject) jsonArray.get(0)).get("distance");
+
+        // 检查距离是否超过5000米
+        if (distance > 5000) {
+            // 如果超过5000米，抛出业务异常
+            throw new OrderBusinessException(MessageConstant.OUT_OF_DELIVERY_RANGE);
+        }
     }
 }
