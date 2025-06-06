@@ -41,6 +41,7 @@
   - `mapper`: 包含了项目中使用的Mapper接口。
   - `service`: 包含了项目中使用的服务接口及其实现类。
   - `task`: 包含了项目中使用的定时任务类。
+  - `websocket`: 包含了项目中使用的WebSocket服务类。
   - `SkyApplication`: 作为Spring Boot应用的入口。
 
 - **sql**: 包含了项目的数据库设计和SQL脚本。
